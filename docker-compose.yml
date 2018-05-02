@@ -1,4 +1,4 @@
-version: '3'
+version: '2'
 volumes:
   static_files:
   gunicorn_socket:
@@ -15,7 +15,7 @@ services:
       - static_files:/static_files
       - gunicorn_socket:/gunicorn_socket
     # command: python manage.py runserver 0.0.0.0:5000
-    command: /gunicorn.sh
+    command: /gunicorn.sh --log-level debug
     ports:
       - "5000:5000"
     expose:
