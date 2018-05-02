@@ -1,0 +1,37 @@
+version: '3'
+volumes:
+  static_files:
+  gunicorn_socket:
+services:
+  # Python/Django + Gunicorn
+  python:
+    build:
+      context: . # We set this context to load the app requirements when building the image
+      dockerfile: ./docker/python/Dockerfile
+    volumes:
+      # include the code of our app
+      - ./:/app
+      # include static files
+      - static_files:/static_files
+      - gunicorn_socket:/gunicorn_socket
+    # command: python manage.py runserver 0.0.0.0:5000
+    command: /gunicorn.sh
+    ports:
+      - "5000:5000"
+    expose:
+      - "5000"
+  # nginx webserver, hosting static_files, uploaded_files, and proxying to the django app
+  nginx:
+    build:
+      context: . # We set this context to load the app requirements when building the image
+      dockerfile: ./docker/nginx/Dockerfile
+    ports:
+      - "8000:8000"
+    expose:
+      - "8000"
+    volumes:
+      # nginx needs to access static files
+      - static_files:/static_files
+      - gunicorn_socket:/gunicorn_socket
+    depends_on:
+      - python
